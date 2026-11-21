@@ -15,12 +15,21 @@ const cartPanel = $("cart");
 const cartItemsEl = $("cartItems");
 
 function renderCart() {
+  const quantities = products.map(product => ({
+    product,
+    quantity: cart.filter(item => item.id === product.id).length
+  })).filter(item => item.quantity > 0);
+
   $("cartCount").textContent = String(cart.length);
-  cartItemsEl.innerHTML = cart.length
-    ? cart.map((product, index) => `
+  cartItemsEl.innerHTML = quantities.length
+    ? quantities.map(({product, quantity}) => `
       <div class="cartItem">
-        <div class="cartItem-info"><span>${product.name}</span><b>${product.price} EGP</b></div>
-        <button type="button" class="remove-item" data-remove="${index}" aria-label="حذف ${product.name} من السلة" title="حذف هذا العنصر">حذف ×</button>
+        <div class="cartItem-info"><span>${product.name}</span><b>${product.price} EGP للقطعة</b></div>
+        <div class="quantity-controls" aria-label="الكمية">
+          <button type="button" data-plus="${product.id}" aria-label="زيادة الكمية">+</button>
+          <span>${quantity}</span>
+          <button type="button" data-minus="${product.id}" aria-label="تقليل الكمية">−</button>
+        </div>
       </div>`).join("")
     : '<p class="empty-cart">السلة فارغة</p>';
   const total = cart.reduce((sum, product) => sum + product.price, 0);
@@ -42,7 +51,7 @@ function sendOrder() {
     return;
   }
   const total = cart.reduce((sum, product) => sum + product.price, 0);
-  const lines = cart.map(product => product.name + " - " + product.price + " EGP");
+  const lines = products.map(product => { const quantity = cart.filter(item => item.id === product.id).length; return quantity ? product.name + " × " + quantity + " - " + (product.price * quantity) + " EGP" : null; }).filter(Boolean);
   const message = ["طلب تجريبي من متجر NORTH:", ...lines, "الإجمالي: " + total + " EGP"].join("\n");
   const url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message);
   const opened = window.open(url, "_blank", "noopener,noreferrer");
@@ -66,12 +75,19 @@ if (productsEl) {
 }
 
 cartItemsEl.addEventListener("click", event => {
-  const button = event.target.closest("button[data-remove]");
-  if (!button || !cartItemsEl.contains(button)) return;
-  const index = Number(button.dataset.remove);
-  if (!Number.isInteger(index) || index < 0 || index >= cart.length) return;
-  cart.splice(index, 1);
-  renderCart();
+  const plus = event.target.closest("button[data-plus]");
+  const minus = event.target.closest("button[data-minus]");
+  if (plus) {
+    const product = products.find(item => item.id === Number(plus.dataset.plus));
+    if (product) cart.push(product);
+    renderCart();
+    return;
+  }
+  if (minus) {
+    const index = cart.findIndex(item => item.id === Number(minus.dataset.minus));
+    if (index !== -1) cart.splice(index, 1);
+    renderCart();
+  }
 });
 $("cartBtn").addEventListener("click", openCart);
 $("closeCart").addEventListener("click", closeCart);
