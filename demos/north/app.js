@@ -12,14 +12,20 @@ let cart = [];
 const $ = id => document.getElementById(id);
 const productsEl = $("products");
 const cartPanel = $("cart");
+const cartItemsEl = $("cartItems");
 
 function renderCart() {
   $("cartCount").textContent = String(cart.length);
-  $("cartItems").innerHTML = cart.length
-    ? cart.map(product => `<div class="cartItem"><span>${product.name}</span><b>${product.price} EGP</b></div>`).join("")
-    : "السلة فارغة";
+  cartItemsEl.innerHTML = cart.length
+    ? cart.map((product, index) => `
+      <div class="cartItem">
+        <div class="cartItem-info"><span>${product.name}</span><b>${product.price} EGP</b></div>
+        <button type="button" class="remove-item" data-remove="${index}" aria-label="حذف ${product.name} من السلة" title="حذف هذا العنصر">حذف ×</button>
+      </div>`).join("")
+    : '<p class="empty-cart">السلة فارغة</p>';
   const total = cart.reduce((sum, product) => sum + product.price, 0);
   $("cartTotal").textContent = "الإجمالي: " + total + " EGP";
+  $("checkout").disabled = cart.length === 0;
 }
 
 function openCart() {
@@ -58,6 +64,15 @@ if (productsEl) {
     window.setTimeout(() => { if (button.isConnected) button.textContent = "أضف للسلة +"; }, 900);
   });
 }
+
+cartItemsEl.addEventListener("click", event => {
+  const button = event.target.closest("button[data-remove]");
+  if (!button || !cartItemsEl.contains(button)) return;
+  const index = Number(button.dataset.remove);
+  if (!Number.isInteger(index) || index < 0 || index >= cart.length) return;
+  cart.splice(index, 1);
+  renderCart();
+});
 $("cartBtn").addEventListener("click", openCart);
 $("closeCart").addEventListener("click", closeCart);
 $("checkout").addEventListener("click", sendOrder);
