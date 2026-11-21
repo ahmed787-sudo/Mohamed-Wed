@@ -1,0 +1,1 @@
+document.querySelectorAll("[data-name]").forEach(button=>button.addEventListener("click",()=>{const name=button.dataset.name,price=button.dataset.price;const msg=encodeURIComponent("Hello, I'm interested in "+name+" ("+price+" EGP). Please share more details.");location.href="https://wa.me/201001879213?text="+msg}));
