@@ -7,3 +7,9 @@
 .cart .remove-item:hover{background:#a33136;color:#fff}
 .cart #checkout:disabled{opacity:.45;cursor:not-allowed}
 .empty-cart{color:#777;text-align:center;padding:24px 8px}
+
+
+.cart .quantity-controls{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.cart .quantity-controls button{width:30px;height:30px;display:grid;place-items:center;border:1px solid #a33136;border-radius:4px;background:#fff;color:#a33136;font-size:19px;line-height:1;cursor:pointer}
+.cart .quantity-controls button:hover{background:#a33136;color:#fff}
+.cart .quantity-controls span{min-width:18px;text-align:center;font-weight:700;font-size:14px}
